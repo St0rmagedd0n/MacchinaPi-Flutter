@@ -66,7 +66,7 @@ file(INSTALL DESTINATION "/home/fabrizio/StudioProjects/macchinapi/build/linux/x
          OLD_RPATH "/home/fabrizio/StudioProjects/macchinapi/linux/flutter/ephemeral:"
          NEW_RPATH "$ORIGIN/lib")
     if(CMAKE_INSTALL_DO_STRIP)
-      execute_process(COMMAND "/snap/flutter/current/usr/bin/strip" "$ENV{DESTDIR}/home/fabrizio/StudioProjects/macchinapi/build/linux/x64/debug/bundle/macchinapi")
+      execute_process(COMMAND "/usr/bin/strip" "$ENV{DESTDIR}/home/fabrizio/StudioProjects/macchinapi/build/linux/x64/debug/bundle/macchinapi")
     endif()
   endif()
 endif()
