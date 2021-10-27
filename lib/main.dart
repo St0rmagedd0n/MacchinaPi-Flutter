@@ -13,13 +13,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'MacchinaPi',
       theme: ThemeData(
-          primarySwatch: Colors.green,
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
+        primarySwatch: Colors.green,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
             primary: Colors.teal,
             onPrimary: Colors.white,
             //padding: EdgeInsets.symmetric(horizontal: 10.0),
-            shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5))),
+            shape: const BeveledRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(5))),
           ),
         ),
       ),
@@ -38,15 +39,20 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final myController = TextEditingController();
+  String new_url = "";
 
-  void _get(String pagina)
-  {
-    var url = Uri.parse('http://192.168.1.108:8000/'+pagina);
+  void dispose() {
+    myController.dispose();
+    super.dispose();
+  }
+
+  void _get(String pagina) {
+    var url = Uri.parse("$new_url:8000/$pagina");
     try {
       var response = http.get(url);
-    }
-    on Exception catch (_) {
-      print("Errore non raggiungo "+url.toString());
+    } on Exception catch (_) {
+      print("Errore non raggiungo " + url.toString());
     }
   }
 
@@ -71,11 +77,16 @@ class _MyHomePageState extends State<MyHomePage> {
   void _destra() {
     setState(() {
       _get("right_side");
-      });
+    });
   }
 
   void _stop() {
     setState(() {
+      if (myController.text == "") {
+        new_url = "http://192.168.1.108";
+      } else {
+        new_url = myController.text;
+      }
       _get("stop");
     });
   }
@@ -87,12 +98,14 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void custumSympleDialog(BuildContext context){
+  void custumSympleDialog(BuildContext context) {
     var dialog = AlertDialog(
       title: Row(
         children: <Widget>[
           Icon(Icons.power_off),
-          Text("Vuoi spegnere?",)
+          Text(
+            "Vuoi spegnere?",
+          )
         ],
       ),
       shape: RoundedRectangleBorder(
@@ -102,26 +115,24 @@ class _MyHomePageState extends State<MyHomePage> {
       elevation: 10,
       actions: [
         ElevatedButton(
-          child: Text("OK"),
-          onPressed: (){
-            _get("halt");
-            Navigator.pop(context); //permette la chiusura del dialog
-          }
-    ),
-    ElevatedButton (
-        child: Text("No"),
+            child: Text("OK"),
+            onPressed: () {
+              _get("halt");
+              Navigator.pop(context); //permette la chiusura del dialog
+            }),
+        ElevatedButton(
+            child: Text("No"),
             onPressed: () {
               _stop();
               Navigator.pop(context); //permette la ciusura del dialog
-            }
-        ),
-        ],
+            }),
+      ],
     );
     showDialog(
-      context: context,
-      builder: (BuildContext context){
-        return dialog;
-      });
+        context: context,
+        builder: (BuildContext context) {
+          return dialog;
+        });
   }
 
   @override
@@ -130,7 +141,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: TextField(
+          controller: myController,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            hintText: "http://192.168.1.108",
+            icon: Icon(Icons.web, color: Colors.white),
+          ),
+        ),
       ),
       body: Center(
         child: Column(
@@ -138,126 +157,112 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Expanded(
               child: Container(
-              margin: EdgeInsets.only(
-                  top: 50.0,
-                  right: 15.0,
-                  left: 15.0,
-                  bottom: 35.0
-              ),
-              child: Center(
+                margin: EdgeInsets.only(
+                    top: 50.0, right: 15.0, left: 15.0, bottom: 35.0),
+                child: Center(
                   //margin: EdgeInsets.all(15.0),
-                  child: Mjpeg (
-                  width: 480.0,
-                  height: 640.0,
+                  child: Mjpeg(
+                    width: 480.0,
+                    height: 640.0,
                     isLive: isRunning,
-                    stream: 'http://192.168.1.108:8001/stream.mjpg',
+                    stream: '$new_url:8001/stream.mjpg',
                     error: (context, error, stack) {
-                    return Text(
-                        'Macchina non raggiungibile',
+                      return Text(
+                        'ACCENDI LA MACCHINA,CORREGGI L\'URL O PREMI STOP',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.red,
                           fontSize: 35.0,
                         ),
-                    );
-                  },// error
-            ),
+                      );
+                    }, // error
+                  ),
+                ),
               ),
-          ),
-        ),
+            ),
             Container(
               margin: EdgeInsets.only(
-                  left: 15.0,
-                  top: 50.0,
-                  right: 15.0,
-                  bottom: 15.0
-              ),
+                  left: 15.0, top: 50.0, right: 15.0, bottom: 15.0),
               child: ElevatedButton(
                 child: Icon(
-                    Icons.arrow_upward,
-                    color: Colors.white,
-                    size: 24.0,
-              ),
-              onPressed: _avanti,
-            ),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              margin: EdgeInsets.all(15.0),
-              child: ElevatedButton(
-                child: Icon(
-                  Icons.arrow_back,
+                  Icons.arrow_upward,
                   color: Colors.white,
                   size: 24.0,
                 ),
-                onPressed: _sinistra,
+                onPressed: _avanti,
               ),
             ),
-            Container(
-              margin: EdgeInsets.all(15.0),
-              child: ElevatedButton(
-                child: Icon(
-                  Icons.stop,
-                  color: Colors.white,
-                  size: 32.0,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  margin: EdgeInsets.all(15.0),
+                  child: ElevatedButton(
+                    child: Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 24.0,
+                    ),
+                    onPressed: _sinistra,
+                  ),
                 ),
-                onPressed: _stop,
-              ),
+                Container(
+                  margin: EdgeInsets.all(15.0),
+                  child: ElevatedButton(
+                    child: Icon(
+                      Icons.stop,
+                      color: Colors.white,
+                      size: 32.0,
+                    ),
+                    onPressed: _stop,
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.all(15.0),
+                  child: ElevatedButton(
+                    child: Icon(
+                      Icons.arrow_forward,
+                      color: Colors.white,
+                      size: 24.0,
+                    ),
+                    onPressed: _destra,
+                  ),
+                ),
+              ],
             ),
             Container(
-              margin: EdgeInsets.all(15.0),
+              margin: EdgeInsets.only(
+                  left: 15.0, top: 15.0, right: 15.0, bottom: 50.0),
               child: ElevatedButton(
+                //style: ElevatedButton.styleFrom(
+                //padding: EdgeInsets.symmetric(vertical: 5.0),
+                //),
                 child: Icon(
-                  Icons.arrow_forward,
+                  Icons.arrow_downward,
                   color: Colors.white,
                   size: 24.0,
                 ),
-                onPressed: _destra,
+                onPressed: _indietro,
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.all(5.0),
+              child: ElevatedButton.icon(
+                icon: Icon(
+                  Icons.power_off,
+                  color: Colors.white,
+                  size: 25.0,
+                ),
+                label: Text("SPEGNI LA MACCHINA",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25.0,
+                    )),
+                onPressed: _spegni,
               ),
             ),
           ],
         ),
-        Container(
-          margin: EdgeInsets.only(
-              left: 15.0,
-              top: 15.0,
-              right: 15.0,
-              bottom: 50.0
-          ),
-          child: ElevatedButton(
-            //style: ElevatedButton.styleFrom(
-              //padding: EdgeInsets.symmetric(vertical: 5.0),
-            //),
-            child: Icon(
-              Icons.arrow_downward,
-              color: Colors.white,
-              size: 24.0,
-            ),
-            onPressed: _indietro,
-          ),
-        ),
-
-        Container(
-          margin: EdgeInsets.all(5.0),
-            child: ElevatedButton.icon(
-                icon: Icon(Icons.power_off,
-                color: Colors.white,
-                size: 25.0,
-            ),
-                label: Text(
-                  "SPEGNI LA MACCHINA",
-                  style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25.0,
-                )
-              ),
-              onPressed: _spegni,
-          ),
-        ),
-      ],
-    ),
       ),
     );
   }
